@@ -1,0 +1,150 @@
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, Button, TextField, MenuItem, Select, InputLabel, FormControl, Grid, Divider, OutlinedInput, Checkbox, ListItemIcon, ListItemText } from '@mui/material';
+import { useDispatch, useSelector } from 'react-redux';
+import { useParams, useNavigate } from 'react-router-dom';
+import { updateProject, getProjectById } from '../features/projects/projectsSlice';
+// import { getTeamMembers } from '../features/team/teamSlice';
+
+const defaultProject = {
+  title: '',
+  description: '',
+  status: 'active',
+  start_date: '',
+  end_date: '',
+  members: [],
+};
+
+const ProjectEditPage = () => {
+  const { id } = useParams();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+//   const { teamMembers } = useSelector((state) => state.team);
+  const project = useSelector((state) => state.projects.projects.find(p => String(p.id) === String(id))) || defaultProject;
+  const [form, setForm] = useState(project);
+
+  useEffect(() => {
+    if (!project || !project.id) {
+      dispatch(getProjectById(id));
+    }
+    // dispatch(getTeamMembers());
+  }, [dispatch, id]);
+
+  useEffect(() => {
+    setForm(project);
+  }, [project]);
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleMembersChange = (e) => {
+    setForm({ ...form, members: e.target.value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    dispatch(updateProject({ id, ...form }));
+    navigate('/projects');
+  };
+
+  return (
+    <Box>
+      <Typography variant="h5" mb={2}>Edit Project</Typography>
+      <form onSubmit={handleSubmit}>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="Title"
+              name="title"
+              value={form.title}
+              onChange={handleChange}
+              required
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <InputLabel>Status</InputLabel>
+              <Select
+                label="Status"
+                name="status"
+                value={form.status}
+                onChange={handleChange}
+              >
+                <MenuItem value="active">Active</MenuItem>
+                <MenuItem value="on_hold">On Hold</MenuItem>
+                <MenuItem value="completed">Completed</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="Start Date"
+              name="start_date"
+              type="date"
+              value={form.start_date}
+              onChange={handleChange}
+              InputLabelProps={{ shrink: true }}
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="End Date"
+              name="end_date"
+              type="date"
+              value={form.end_date}
+              onChange={handleChange}
+              InputLabelProps={{ shrink: true }}
+              fullWidth
+            />
+          </Grid>
+          {/* <Grid item xs={12}>
+            <FormControl fullWidth>
+              <InputLabel>Members</InputLabel>
+              <Select
+                label="Members"
+                name="members"
+                multiple
+                value={form.members}
+                onChange={handleMembersChange}
+                input={<OutlinedInput label="Members" />}
+                renderValue={(selected) =>
+                  teamMembers
+                    .filter((u) => selected.includes(u.id))
+                    .map((u) => u.name)
+                    .join(', ')
+                }
+              >
+                {teamMembers.map((u) => (
+                  <MenuItem key={u.id} value={u.id}>
+                    <ListItemIcon>
+                      <Checkbox checked={form.members.indexOf(u.id) > -1} />
+                    </ListItemIcon>
+                    <ListItemText primary={`${u.name} (${u.email})`} />
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid> */}
+          <Grid item xs={12}>
+            <TextField
+              label="Description"
+              name="description"
+              value={form.description}
+              onChange={handleChange}
+              multiline
+              rows={3}
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <Button type="submit" variant="contained" color="primary">Save Changes</Button>
+          </Grid>
+        </Grid>
+      </form>
+    </Box>
+  );
+};
+
+export default ProjectEditPage;
