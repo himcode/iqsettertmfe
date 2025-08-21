@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button, TextField, MenuItem, Select, InputLabel, FormControl, Grid, Divider, List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, OutlinedInput, Checkbox, ListItemIcon } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
+// import DeleteIcon from '@mui/icons-material/Delete';
 import { useDispatch, useSelector } from 'react-redux';
 import { createProject, deleteProject, getUserProjects } from '../features/projects/projectsSlice';
 import { useNavigate } from 'react-router-dom';
@@ -44,9 +44,9 @@ const ProjectsPage = () => {
     setProject(defaultProject);
   };
 
-  const handleDelete = (id) => {
-    dispatch(deleteProject(id));
-  };
+  // const handleDelete = (id) => {
+  //   dispatch(deleteProject(id));
+  // };
 
   const handleEdit = (id) => {
     navigate(`/projects/${id}`);
@@ -161,9 +161,9 @@ const ProjectsPage = () => {
               <IconButton edge="end" onClick={() => handleEdit(p.id)} sx={{ mr: 1 }}>
                 <EditIcon />
               </IconButton>
-              <IconButton edge="end" onClick={() => handleDelete(p.id)}>
+              {/* <IconButton edge="end" onClick={() => handleDelete(p.id)}>
                 <DeleteIcon />
-              </IconButton>
+              </IconButton> */}
             </ListItemSecondaryAction>
           </ListItem>
         ))}

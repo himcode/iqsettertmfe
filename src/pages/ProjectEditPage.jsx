@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button, TextField, MenuItem, Select, InputLabel, FormControl, Grid, Divider, OutlinedInput, Checkbox, ListItemIcon, ListItemText } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
-import { updateProject, getProjectById } from '../features/projects/projectsSlice';
+import { updateProject, getProjectById, getProjectWorkflow } from '../features/projects/projectsSlice';
 // import { getTeamMembers } from '../features/team/teamSlice';
 
 const defaultProject = {
@@ -18,14 +18,18 @@ const ProjectEditPage = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-//   const { teamMembers } = useSelector((state) => state.team);
+  //   const { teamMembers } = useSelector((state) => state.team);
   const project = useSelector((state) => state.projects.projects.find(p => String(p.id) === String(id))) || defaultProject;
+  const workflow = useSelector((state) => state.projects.workflow);
+  const workflowStatus = useSelector((state) => state.projects.workflowStatus);
+  const workflowError = useSelector((state) => state.projects.workflowError);
   const [form, setForm] = useState(project);
 
   useEffect(() => {
     if (!project || !project.id) {
       dispatch(getProjectById(id));
     }
+    dispatch(getProjectWorkflow(id));
     // dispatch(getTeamMembers());
   }, [dispatch, id]);
 
@@ -99,34 +103,7 @@ const ProjectEditPage = () => {
               fullWidth
             />
           </Grid>
-          {/* <Grid item xs={12}>
-            <FormControl fullWidth>
-              <InputLabel>Members</InputLabel>
-              <Select
-                label="Members"
-                name="members"
-                multiple
-                value={form.members}
-                onChange={handleMembersChange}
-                input={<OutlinedInput label="Members" />}
-                renderValue={(selected) =>
-                  teamMembers
-                    .filter((u) => selected.includes(u.id))
-                    .map((u) => u.name)
-                    .join(', ')
-                }
-              >
-                {teamMembers.map((u) => (
-                  <MenuItem key={u.id} value={u.id}>
-                    <ListItemIcon>
-                      <Checkbox checked={form.members.indexOf(u.id) > -1} />
-                    </ListItemIcon>
-                    <ListItemText primary={`${u.name} (${u.email})`} />
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid> */}
+          {/* ...existing code for members... */}
           <Grid item xs={12}>
             <TextField
               label="Description"
@@ -143,6 +120,24 @@ const ProjectEditPage = () => {
           </Grid>
         </Grid>
       </form>
+      <Divider sx={{ my: 3 }} />
+      <Typography variant="h6" mb={1}>Project Workflow</Typography>
+      {workflowStatus === 'loading' ? (
+        <Typography color="text.secondary">Loading workflow...</Typography>
+      ) : workflowError ? (
+        <Typography color="error">{workflowError}</Typography>
+      ) : Array.isArray(workflow) ? (
+        <Box>
+          {workflow.map((step, idx) => (
+            <Box key={idx} sx={{ mb: 1, p: 1, border: '1px solid #eee', borderRadius: 1 }}>
+              <Typography variant="subtitle2">Step {idx + 1}</Typography>
+              <Typography>{step}</Typography>
+            </Box>
+          ))}
+        </Box>
+      ) : (
+        <Typography color="text.secondary">No workflow data.</Typography>
+      )}
     </Box>
   );
 };

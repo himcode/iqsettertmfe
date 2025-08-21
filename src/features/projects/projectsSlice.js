@@ -1,3 +1,17 @@
+export const getProjectWorkflow = createAsyncThunk(
+  'projects/getProjectWorkflow',
+  async (projectId, { getState, rejectWithValue }) => {
+    try {
+      const { auth } = getState();
+      const response = await axios.get(`/api/projects/project/${projectId}`,
+        { headers: { Authorization: `Bearer ${auth.accessToken}` } });
+      // Expecting { workflow: [...] }
+      return response.data.workflow;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
 export const updateProject = createAsyncThunk(
   'projects/updateProject',
   async ({ id, ...projectData }, { getState, rejectWithValue }) => {
@@ -32,6 +46,9 @@ const initialState = {
   projects: [],
   status: 'idle',
   error: null,
+  workflow: null,
+  workflowStatus: 'idle',
+  workflowError: null,
 };
 
 export const getUserProjects = createAsyncThunk(
@@ -41,6 +58,21 @@ export const getUserProjects = createAsyncThunk(
       const { auth } = getState();
       const response = await axios.get('/api/projects', {
         headers: { Authorization: `Bearer ${auth.accessToken}` },
+      })
+      .addCase(getProjectWorkflow.pending, (state) => {
+        state.workflowStatus = 'loading';
+        state.workflowError = null;
+        state.workflow = null;
+      })
+      .addCase(getProjectWorkflow.fulfilled, (state, action) => {
+        state.workflowStatus = 'succeeded';
+        state.workflow = action.payload;
+        state.workflowError = null;
+      })
+      .addCase(getProjectWorkflow.rejected, (state, action) => {
+        state.workflowStatus = 'failed';
+        state.workflowError = action.payload;
+        state.workflow = null;
       });
       return response.data;
     } catch (err) {
