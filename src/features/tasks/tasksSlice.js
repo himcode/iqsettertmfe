@@ -19,7 +19,7 @@ export const fetchTasks = createAsyncThunk(
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
     }
-  }
+  },
 );
 
 export const createTask = createAsyncThunk(
@@ -34,7 +34,22 @@ export const createTask = createAsyncThunk(
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
     }
-  }
+  },
+);
+
+export const fetchTaskById = createAsyncThunk(
+  'tasks/fetchTaskById',
+  async (taskId, { getState, rejectWithValue }) => {
+    try {
+      const { auth } = getState();
+      const response = await axios.get(`/api/task/${taskId}`, {
+        headers: { Authorization: `Bearer ${auth.accessToken}` },
+      });
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  },
 );
 
 const tasksSlice = createSlice({

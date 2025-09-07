@@ -5,8 +5,6 @@ import { Box, Toolbar } from '@mui/material';
 import store from './app/store';
 import ProtectedRoute from './components/ProtectedRoute';
 import NotificationProvider from './components/NotificationProvider';
-import Navbar from './components/Header';
-import Sidebar from './components/Sidebar';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import Dashboard from './pages/Dashboard';
@@ -16,22 +14,17 @@ import ProjectsPage from './pages/ProjectsPage';
 import ProjectEditPage from './pages/ProjectEditPage';
 import TeamPage from './pages/TeamPage';
 import './App.css';
+import AppLayout from './pages/AppLayout';
+import TaskPage from './pages/TaskPage';
 
 const AppContent = () => {
   const { accessToken } = useSelector((state) => state.auth);
-  // Track page title for header (optional: can be improved with context or router)
-  const [pageTitle, setPageTitle] = React.useState('Dashboard');
-  const handleSearch = (query) => {
-    // Implement search logic or pass to children
-  };
   return (
     <NotificationProvider>
       <Router>
-  <Navbar />
         <Box sx={{ display: 'flex' }}>
-          {accessToken && <Sidebar />}
-          <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-            <Toolbar />
+          <Box sx={{ flexGrow: 1, p: 1 }}>
+            {accessToken && <AppLayout />}
             <Routes>
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
@@ -39,15 +32,51 @@ const AppContent = () => {
                 path="/"
                 element={
                   <ProtectedRoute>
-                    <Dashboard setPageTitle={setPageTitle} />
+                    <Dashboard />
                   </ProtectedRoute>
                 }
               />
-              <Route path="/tasks" element={<ProtectedRoute><TasksPage /></ProtectedRoute>} />
-              <Route path="/projects" element={<ProtectedRoute><ProjectsPage /></ProtectedRoute>} />
-              <Route path="/projects/:id" element={<ProtectedRoute><ProjectEditPage /></ProtectedRoute>} />
-              <Route path="/team" element={<ProtectedRoute><TeamPage /></ProtectedRoute>} />
-              <Route path="*" element={<NotFound />} />
+              <Route
+                path="/tasks"
+                element={
+                  <ProtectedRoute>
+                    <TasksPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/task/:id"
+                element={
+                  <ProtectedRoute>
+                    <TaskPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/projects"
+                element={
+                  <ProtectedRoute>
+                    <ProjectsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/projects/:id"
+                element={
+                  <ProtectedRoute>
+                    <ProjectEditPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/team"
+                element={
+                  <ProtectedRoute>
+                    <TeamPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="*" element={<Dashboard />} />
             </Routes>
           </Box>
         </Box>

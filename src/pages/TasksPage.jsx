@@ -1,13 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Typography,
   Button,
-  IconButton,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
   TextField,
   Divider,
   MenuItem,
@@ -15,41 +11,44 @@ import {
   InputLabel,
   FormControl,
   Grid,
-} from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
-import AddIcon from "@mui/icons-material/Add";
-import { getTeamMembers } from "../utils/teamUtils";
-import useAuth from "../hooks/useAuth";
-import { getUserTasks } from "../api/service";
-import { useDispatch, useSelector } from "react-redux";
-import { createTask } from "../features/tasks/tasksSlice";
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+} from '@mui/material';
+import { getTeamMembers } from '../utils/teamUtils';
+import useAuth from '../hooks/useAuth';
+import { getUserTasks } from '../api/service';
+import { useDispatch } from 'react-redux';
+import { createTask } from '../features/tasks/tasksSlice';
 
 const defaultTask = {
-  title: "",
-  description: "",
-  status: "todo",
-  priority: "medium",
-  project_id: "",
-  assigned_to: "",
-  due_date: "",
+  title: '',
+  description: '',
+  status: 'todo',
+  priority: 'medium',
+  project_id: '',
+  assigned_to: '',
+  due_date: '',
 };
 
 const TasksPage = () => {
   const dispatch = useDispatch();
   const [task, setTask] = useState(defaultTask);
-  const [newTask, setNewTask] = React.useState("");
-  const [assignedUser, setAssignedUser] = React.useState("");
+  const [newTask, setNewTask] = React.useState('');
+  const [assignedUser, setAssignedUser] = React.useState('');
   const teamMembers = getTeamMembers();
   const { user } = useAuth();
   const [tasks, setTasks] = useState([]);
-
+  const navigate = useNavigate();
   useEffect(() => {
     getUserTasks()
       .then((data) => setTasks(data))
       .catch(() => setTasks([]));
   }, []);
-
-
 
   const handleDeleteTask = (id) => {
     setTasks(tasks.filter((t) => t.id !== id));
@@ -65,9 +64,9 @@ const TasksPage = () => {
     const formattedTask = {
       ...task,
       due_date: task.due_date
-        ? new Date(task.due_date).toISOString().split("T")[0]
+        ? new Date(task.due_date).toISOString().split('T')[0]
         : null,
-        createdBy: user.id
+      createdBy: user.id,
     };
 
     // Dispatch createTask thunk to save to backend
@@ -78,7 +77,7 @@ const TasksPage = () => {
   // TODO: Fetch projects and users for dropdowns
   const projects = [];
   const users = [{ id: user.id, name: user.name }];
-  
+
   return (
     <Box>
       <Typography variant="h5" mb={2}>
@@ -86,7 +85,7 @@ const TasksPage = () => {
       </Typography>
       <form onSubmit={handleSubmit}>
         <Grid container spacing={2}>
-          <Grid item xs={12} sm={6}>
+          <Grid item size={4}>
             <TextField
               label="Title"
               name="title"
@@ -96,7 +95,7 @@ const TasksPage = () => {
               fullWidth
             />
           </Grid>
-          <Grid item xs={12} sm={6}>
+          <Grid item size={2}>
             <FormControl fullWidth>
               <InputLabel>Status</InputLabel>
               <Select
@@ -111,7 +110,7 @@ const TasksPage = () => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} sm={6}>
+          <Grid item size={2}>
             <FormControl fullWidth>
               <InputLabel>Priority</InputLabel>
               <Select
@@ -126,26 +125,8 @@ const TasksPage = () => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} sm={6}>
-            {/* <FormControl fullWidth>
-              <InputLabel>Project</InputLabel>
-              <Select
-                label="Project"
-                name="project_id"
-                value={task.project_id}
-                onChange={handleChange}
-              >
-                <MenuItem value="">None</MenuItem>
-                {projects.map((p) => (
-                  <MenuItem key={p.id} value={p.id}>
-                    {p.title}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl> */}
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <FormControl fullWidth>
+          <Grid item size={2}>
+            <FormControl fullWidth={true}>
               <InputLabel>Assign To</InputLabel>
               <Select
                 label="Assign To"
@@ -162,21 +143,20 @@ const TasksPage = () => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} sm={6}>
+          <Grid item size={4}>
             <TextField
               label="Due Date"
               name="due_date"
               type="date"
               value={task.due_date}
               onChange={(e) => {
-                // Always store in YYYY-MM-DD for input display
                 setTask({ ...task, due_date: e.target.value });
               }}
               InputLabelProps={{ shrink: true }}
               fullWidth
             />
           </Grid>
-          <Grid item xs={12}>
+          <Grid item size={4}>
             <TextField
               label="Description"
               name="description"
@@ -187,7 +167,7 @@ const TasksPage = () => {
               fullWidth
             />
           </Grid>
-          <Grid item xs={12}>
+          <Grid item size={2}>
             <Button type="submit" variant="contained" color="primary">
               Create Task
             </Button>
@@ -195,22 +175,67 @@ const TasksPage = () => {
         </Grid>
       </form>
       <Divider sx={{ my: 3 }} />
-      <Typography variant="h6" mb={1}>
-        Tasks
-      </Typography>
-      <List>
-        {tasks
-          .map((task) => (
-            <ListItem key={task.id} divider>
-              {
-                task.title
-              }
-                
-                
-              
-            </ListItem>
-          ))}
-      </List>
+      <Box sx={{ width: '100%' }}>
+        <Typography variant="h6" mb={1}>
+          Tasks
+        </Typography>
+        <TableContainer component={Paper}>
+          <Table sx={{ minWidth: 650 }} aria-label="tasks table">
+            <TableHead>
+              <TableRow>
+                <TableCell>Title</TableCell>
+                <TableCell>Status</TableCell>
+                <TableCell>Priority</TableCell>
+                <TableCell>Assigned To</TableCell>
+                <TableCell>Due Date</TableCell>
+                <TableCell>Description</TableCell>
+                <TableCell>Created At</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {tasks.map((row) => (
+                <TableRow key={row.id}>
+                  <TableCell>
+                    <a onClick={() => navigate(`task/${row.id}`)}>
+                      {row.title}{' '}
+                    </a>
+                  </TableCell>
+                  <TableCell>
+                    {row.status === 'todo'
+                      ? 'To Do'
+                      : row.status === 'in_progress'
+                      ? 'In Progress'
+                      : row.status === 'done'
+                      ? 'Done'
+                      : row.status}
+                  </TableCell>
+                  <TableCell>
+                    {row.priority === '1' || row.priority === 1
+                      ? 'Low'
+                      : row.priority === '2' || row.priority === 2
+                      ? 'Medium'
+                      : row.priority === '3' || row.priority === 3
+                      ? 'High'
+                      : row.priority}
+                  </TableCell>
+                  <TableCell>{row.assigned_to || '-'}</TableCell>
+                  <TableCell>
+                    {row.due_date
+                      ? new Date(row.due_date).toLocaleDateString()
+                      : '-'}
+                  </TableCell>
+                  <TableCell>{row.description}</TableCell>
+                  <TableCell>
+                    {row.created_at
+                      ? new Date(row.created_at).toLocaleString()
+                      : '-'}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Box>
     </Box>
   );
 };
