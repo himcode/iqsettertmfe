@@ -19,12 +19,12 @@ import {
   TableRow,
   Paper,
 } from '@mui/material';
-import { getTeamMembers } from '../utils/teamUtils';
 import useAuth from '../hooks/useAuth';
 import { getUserTasks } from '../api/service';
 import { useDispatch } from 'react-redux';
 import { createTask } from '../features/tasks/tasksSlice';
-
+import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 const defaultTask = {
   title: '',
   description: '',
@@ -38,9 +38,7 @@ const defaultTask = {
 const TasksPage = () => {
   const dispatch = useDispatch();
   const [task, setTask] = useState(defaultTask);
-  const [newTask, setNewTask] = React.useState('');
-  const [assignedUser, setAssignedUser] = React.useState('');
-  const teamMembers = getTeamMembers();
+
   const { user } = useAuth();
   const [tasks, setTasks] = useState([]);
   const navigate = useNavigate();
@@ -144,17 +142,16 @@ const TasksPage = () => {
             </FormControl>
           </Grid>
           <Grid item size={4}>
-            <TextField
-              label="Due Date"
-              name="due_date"
-              type="date"
-              value={task.due_date}
-              onChange={(e) => {
-                setTask({ ...task, due_date: e.target.value });
-              }}
-              InputLabelProps={{ shrink: true }}
-              fullWidth
-            />
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <DatePicker
+                label="Select Date"
+                value={task.due_date || new Date()}
+                onChange={(newDate) => {
+                  setTask({ ...task, due_date: new Date(newDate) });
+                }}
+                renderInput={(params) => <TextField {...params} />}
+              />
+            </LocalizationProvider>
           </Grid>
           <Grid item size={4}>
             <TextField
@@ -196,8 +193,11 @@ const TasksPage = () => {
               {tasks.map((row) => (
                 <TableRow key={row.id}>
                   <TableCell>
-                    <a onClick={() => navigate(`task/${row.id}`)}>
-                      {row.title}{' '}
+                    <a
+                      onClick={() => navigate(`/task/${row.id}`)}
+                      style={{ cursor: 'pointer', color: '#1976d2' }}
+                    >
+                      {row.title}
                     </a>
                   </TableCell>
                   <TableCell>

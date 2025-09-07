@@ -3,14 +3,15 @@ export const getProjectWorkflow = createAsyncThunk(
   async (projectId, { getState, rejectWithValue }) => {
     try {
       const { auth } = getState();
-      const response = await axios.get(`/api/projects/project/${projectId}`,
-        { headers: { Authorization: `Bearer ${auth.accessToken}` } });
+      const response = await axios.get(`/api/projects/project/${projectId}`, {
+        headers: { Authorization: `Bearer ${auth.accessToken}` },
+      });
       // Expecting { workflow: [...] }
       return response.data.workflow;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
     }
-  }
+  },
 );
 export const updateProject = createAsyncThunk(
   'projects/updateProject',
@@ -24,20 +25,21 @@ export const updateProject = createAsyncThunk(
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
     }
-  }
+  },
 );
 export const getProjectById = createAsyncThunk(
   'projects/getProjectById',
   async (projectId, { getState, rejectWithValue }) => {
     try {
       const { auth } = getState();
-      const response = await axios.get(`/api/projects/${projectId}`,
-        { headers: { Authorization: `Bearer ${auth.accessToken}` } });
+      const response = await axios.get(`/api/projects/${projectId}`, {
+        headers: { Authorization: `Bearer ${auth.accessToken}` },
+      });
       return response.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
     }
-  }
+  },
 );
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
@@ -47,7 +49,6 @@ const initialState = {
   projects: [],
   status: 'idle',
   error: null,
-  workflow: null,
   workflowStatus: 'idle',
   workflowError: null,
 };
@@ -60,12 +61,12 @@ export const getUserProjects = createAsyncThunk(
       const response = await axios.get('/api/projects', {
         headers: { Authorization: `Bearer ${auth.accessToken}` },
       });
-// (removed duplicate/erroneous code)
-  return response.data;
+      // (removed duplicate/erroneous code)
+      return response.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
     }
-  }
+  },
 );
 
 export const createProject = createAsyncThunk(
@@ -80,7 +81,7 @@ export const createProject = createAsyncThunk(
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
     }
-  }
+  },
 );
 
 export const deleteProject = createAsyncThunk(
@@ -95,7 +96,7 @@ export const deleteProject = createAsyncThunk(
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
     }
-  }
+  },
 );
 
 const projectsSlice = createSlice({
@@ -131,11 +132,11 @@ const projectsSlice = createSlice({
         state.error = action.payload;
       })
       .addCase(deleteProject.fulfilled, (state, action) => {
-        state.projects = state.projects.filter(p => p.id !== action.payload);
+        state.projects = state.projects.filter((p) => p.id !== action.payload);
       })
       .addCase(updateProject.fulfilled, (state, action) => {
         // Update the project in the array
-        const idx = state.projects.findIndex(p => p.id === action.payload.id);
+        const idx = state.projects.findIndex((p) => p.id === action.payload.id);
         if (idx !== -1) {
           state.projects[idx] = action.payload;
         }
@@ -152,7 +153,7 @@ const projectsSlice = createSlice({
       })
       .addCase(getProjectById.fulfilled, (state, action) => {
         // Replace or add the fetched project in the projects array
-        const idx = state.projects.findIndex(p => p.id === action.payload.id);
+        const idx = state.projects.findIndex((p) => p.id === action.payload.id);
         if (idx !== -1) {
           state.projects[idx] = action.payload;
         } else {

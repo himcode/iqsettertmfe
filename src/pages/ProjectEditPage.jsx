@@ -1,11 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button, TextField, MenuItem, Select, InputLabel, FormControl, Grid, Divider, OutlinedInput, Checkbox, ListItemIcon, ListItemText } from '@mui/material';
+import {
+  Box,
+  Typography,
+  Button,
+  TextField,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+  Grid,
+  Divider,
+  OutlinedInput,
+  Checkbox,
+  ListItemIcon,
+  ListItemText,
+} from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
-import { updateProject, getProjectById } from '../features/projects/projectsSlice';
+import {
+  updateProject,
+  getProjectById,
+} from '../features/projects/projectsSlice';
 import { fetchWorkflowStages } from '../api/workflow';
 // import { getTeamMembers } from '../features/team/teamSlice';
-
+import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 const defaultProject = {
   title: '',
   description: '',
@@ -13,7 +32,7 @@ const defaultProject = {
   start_date: '',
   end_date: '',
   members: [],
-  workflow: []
+  workflow: [],
 };
 
 const ProjectEditPage = () => {
@@ -21,7 +40,11 @@ const ProjectEditPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   //   const { teamMembers } = useSelector((state) => state.team);
-  const project = useSelector((state) => state.projects.projects.find(p => String(p.id) === String(id))) || defaultProject;
+  const project =
+    useSelector((state) =>
+      state.projects.projects.find((p) => String(p.id) === String(id)),
+    ) || defaultProject;
+  console.log('Loaded project:', project);
   // Use workflow from project object if present
   const [form, setForm] = useState(project);
   const [workflow, setWorkflow] = useState([]);
@@ -31,7 +54,8 @@ const ProjectEditPage = () => {
 
   useEffect(() => {
     if (!project || !project.id) {
-      dispatch(getProjectById(id));
+      const result = dispatch(getProjectById(id));
+      console.log(result);
     }
     // dispatch(getTeamMembers());
     // Fetch workflow stages for this project
@@ -71,7 +95,9 @@ const ProjectEditPage = () => {
 
   return (
     <Box>
-      <Typography variant="h5" mb={2}>Edit Project</Typography>
+      <Typography variant="h5" mb={2}>
+        Edit Project
+      </Typography>
       <form onSubmit={handleSubmit}>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6}>
@@ -100,26 +126,30 @@ const ProjectEditPage = () => {
             </FormControl>
           </Grid>
           <Grid item xs={12} sm={6}>
-            <TextField
-              label="Start Date"
-              name="start_date"
-              type="date"
-              value={form.start_date}
-              onChange={handleChange}
-              InputLabelProps={{ shrink: true }}
-              fullWidth
-            />
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <DatePicker
+                label="Start Date"
+                value={
+                  form.start_date ? new Date(form?.start_date) : new Date()
+                }
+                onChange={(newDate) => {
+                  setForm({ ...form, start_date: new Date(newDate) });
+                }}
+                renderInput={(params) => <TextField {...params} />}
+              />
+            </LocalizationProvider>
           </Grid>
           <Grid item xs={12} sm={6}>
-            <TextField
-              label="End Date"
-              name="end_date"
-              type="date"
-              value={form.end_date}
-              onChange={handleChange}
-              InputLabelProps={{ shrink: true }}
-              fullWidth
-            />
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <DatePicker
+                label="Start Date"
+                value={form.end_date ? new Date(form.end_date) : new Date()}
+                onChange={(newDate) => {
+                  setForm({ ...form, end_date: new Date(newDate) });
+                }}
+                renderInput={(params) => <TextField {...params} />}
+              />
+            </LocalizationProvider>
           </Grid>
           {/* ...existing code for members... */}
           <Grid item xs={12}>
@@ -134,12 +164,16 @@ const ProjectEditPage = () => {
             />
           </Grid>
           <Grid item xs={12}>
-            <Button type="submit" variant="contained" color="primary">Save Changes</Button>
+            <Button type="submit" variant="contained" color="primary">
+              Save Changes
+            </Button>
           </Grid>
         </Grid>
       </form>
       <Divider sx={{ my: 3 }} />
-      <Typography variant="h6" mb={1}>Project Workflow</Typography>
+      <Typography variant="h6" mb={1}>
+        Project Workflow
+      </Typography>
       {workflowLoading ? (
         <Typography color="text.secondary">Loading workflow...</Typography>
       ) : workflowError ? (
@@ -147,8 +181,13 @@ const ProjectEditPage = () => {
       ) : Array.isArray(workflow) && workflow.length > 0 ? (
         <Box>
           {workflow.map((step, idx) => (
-            <Box key={step.id || idx} sx={{ mb: 1, p: 1, border: '1px solid #eee', borderRadius: 1 }}>
-              <Typography variant="subtitle2">Step {idx + 1}: {step.name}</Typography>
+            <Box
+              key={step.id || idx}
+              sx={{ mb: 1, p: 1, border: '1px solid #eee', borderRadius: 1 }}
+            >
+              <Typography variant="subtitle2">
+                Step {idx + 1}: {step.name}
+              </Typography>
               {/* Optionally show more details: */}
               {/* <Typography color="text.secondary">Order: {step.stage_order}</Typography> */}
             </Box>
