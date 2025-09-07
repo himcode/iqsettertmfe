@@ -20,15 +20,15 @@ const Sidebar = () => {
     >
       <Toolbar />
       <List>
-        <ListItem button onClick={() => navigate('/tasks')}>
+  <ListItem component="button" onClick={() => navigate('/tasks')}>
           <ListItemIcon><AssignmentIcon /></ListItemIcon>
           <ListItemText primary="Tasks" />
         </ListItem>
-        <ListItem button onClick={() => navigate('/projects')}>
+  <ListItem component="button" onClick={() => navigate('/projects')}>
           <ListItemIcon><FolderIcon /></ListItemIcon>
           <ListItemText primary="Projects" />
         </ListItem>
-        <ListItem button onClick={() => navigate('/team')}>
+  <ListItem component="button" onClick={() => navigate('/team')}>
           <ListItemIcon><GroupIcon /></ListItemIcon>
           <ListItemText primary="Team Management" />
         </ListItem>
