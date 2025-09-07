@@ -43,6 +43,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
 const initialState = {
+  workflow: null,
   projects: [],
   status: 'idle',
   error: null,
@@ -58,23 +59,9 @@ export const getUserProjects = createAsyncThunk(
       const { auth } = getState();
       const response = await axios.get('/api/projects', {
         headers: { Authorization: `Bearer ${auth.accessToken}` },
-      })
-      .addCase(getProjectWorkflow.pending, (state) => {
-        state.workflowStatus = 'loading';
-        state.workflowError = null;
-        state.workflow = null;
-      })
-      .addCase(getProjectWorkflow.fulfilled, (state, action) => {
-        state.workflowStatus = 'succeeded';
-        state.workflow = action.payload;
-        state.workflowError = null;
-      })
-      .addCase(getProjectWorkflow.rejected, (state, action) => {
-        state.workflowStatus = 'failed';
-        state.workflowError = action.payload;
-        state.workflow = null;
       });
-      return response.data;
+// (removed duplicate/erroneous code)
+  return response.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
     }

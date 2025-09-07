@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button, TextField, MenuItem, Select, InputLabel, FormControl, Grid, Divider, OutlinedInput, Checkbox, ListItemIcon, ListItemText } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
-import { updateProject, getProjectById, getProjectWorkflow } from '../features/projects/projectsSlice';
+import { updateProject, getProjectById } from '../features/projects/projectsSlice';
+import { fetchWorkflowStages } from '../api/workflow';
 // import { getTeamMembers } from '../features/team/teamSlice';
 
 const defaultProject = {
@@ -12,6 +13,7 @@ const defaultProject = {
   start_date: '',
   end_date: '',
   members: [],
+  workflow: []
 };
 
 const ProjectEditPage = () => {
@@ -20,18 +22,34 @@ const ProjectEditPage = () => {
   const navigate = useNavigate();
   //   const { teamMembers } = useSelector((state) => state.team);
   const project = useSelector((state) => state.projects.projects.find(p => String(p.id) === String(id))) || defaultProject;
-  const workflow = useSelector((state) => state.projects.workflow);
-  const workflowStatus = useSelector((state) => state.projects.workflowStatus);
-  const workflowError = useSelector((state) => state.projects.workflowError);
+  // Use workflow from project object if present
   const [form, setForm] = useState(project);
+  const [workflow, setWorkflow] = useState([]);
+  const [workflowLoading, setWorkflowLoading] = useState(false);
+  const [workflowError, setWorkflowError] = useState(null);
+  const accessToken = useSelector((state) => state.auth.accessToken);
 
   useEffect(() => {
     if (!project || !project.id) {
       dispatch(getProjectById(id));
     }
-    dispatch(getProjectWorkflow(id));
     // dispatch(getTeamMembers());
-  }, [dispatch, id]);
+    // Fetch workflow stages for this project
+    const fetchWorkflow = async () => {
+      setWorkflowLoading(true);
+      setWorkflowError(null);
+      try {
+        const data = await fetchWorkflowStages(id, accessToken);
+        console.log('Fetched workflow stages:', data);
+        setWorkflow(data);
+      } catch (err) {
+        setWorkflowError(err.message || 'Failed to load workflow');
+      } finally {
+        setWorkflowLoading(false);
+      }
+    };
+    fetchWorkflow();
+  }, [dispatch, id, accessToken]);
 
   useEffect(() => {
     setForm(project);
@@ -122,16 +140,17 @@ const ProjectEditPage = () => {
       </form>
       <Divider sx={{ my: 3 }} />
       <Typography variant="h6" mb={1}>Project Workflow</Typography>
-      {workflowStatus === 'loading' ? (
+      {workflowLoading ? (
         <Typography color="text.secondary">Loading workflow...</Typography>
       ) : workflowError ? (
         <Typography color="error">{workflowError}</Typography>
-      ) : Array.isArray(workflow) ? (
+      ) : Array.isArray(workflow) && workflow.length > 0 ? (
         <Box>
           {workflow.map((step, idx) => (
-            <Box key={idx} sx={{ mb: 1, p: 1, border: '1px solid #eee', borderRadius: 1 }}>
-              <Typography variant="subtitle2">Step {idx + 1}</Typography>
-              <Typography>{step}</Typography>
+            <Box key={step.id || idx} sx={{ mb: 1, p: 1, border: '1px solid #eee', borderRadius: 1 }}>
+              <Typography variant="subtitle2">Step {idx + 1}: {step.name}</Typography>
+              {/* Optionally show more details: */}
+              {/* <Typography color="text.secondary">Order: {step.stage_order}</Typography> */}
             </Box>
           ))}
         </Box>

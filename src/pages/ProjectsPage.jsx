@@ -14,7 +14,7 @@ const defaultProject = {
   status: 'active',
   start_date: '',
   end_date: '',
-  members: [],
+  members: []
 };
 
 
@@ -29,7 +29,7 @@ const ProjectsPage = () => {
     dispatch(getUserProjects());
     // dispatch(getTeamMembers());
   }, [dispatch]);
-
+  
   const handleChange = (e) => {
     setProject({ ...project, [e.target.name]: e.target.value });
   };
@@ -152,10 +152,24 @@ const ProjectsPage = () => {
       <Typography variant="h6" mb={1}>Projects</Typography>
       <List>
         {projects.map((p) => (
-          <ListItem key={p.id} divider>
+          <ListItem key={p.id} divider alignItems="flex-start">
             <ListItemText
               primary={p.title}
-              secondary={`Status: ${p.status} | ${p.start_date} - ${p.end_date}`}
+              secondary={
+                <>
+                  {`Status: ${p.status} | ${p.start_date} - ${p.end_date}`}
+                  {Array.isArray(p.workflow) && p.workflow.length > 0 && (
+                    <Box sx={{ mt: 1 }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 500 }}>Workflow:</Typography>
+                      {p.workflow.map((stage, idx) => (
+                        <Typography key={idx} variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+                          {idx + 1}. {stage}
+                        </Typography>
+                      ))}
+                    </Box>
+                  )}
+                </>
+              }
             />
             <ListItemSecondaryAction>
               <IconButton edge="end" onClick={() => handleEdit(p.id)} sx={{ mr: 1 }}>
