@@ -1,5 +1,7 @@
 // layouts/AppLayout.jsx
 import React from 'react';
+import { useDispatch } from 'react-redux';
+import { logout } from '../features/auth/authSlice';
 import { useNavigate } from 'react-router-dom';
 import {
   AppBar,
@@ -22,7 +24,7 @@ import SearchIcon from '@mui/icons-material/Search';
 
 export default function AppLayout() {
   const navigate = useNavigate();
-  const [auth, setAuth] = React.useState(true);
+  const dispatch = useDispatch();
   const [anchorEl, setAnchorEl] = React.useState(null);
 
   const handleMenu = (event) => {
@@ -30,7 +32,9 @@ export default function AppLayout() {
   };
 
   const handleClose = () => {
+    dispatch(logout());
     setAnchorEl(null);
+    navigate('/login');
   };
 
   return (
@@ -65,38 +69,36 @@ export default function AppLayout() {
               onChange={(e) => console.log(e.target.value)} // Handle search input
             />
           </Search>
-          {auth && (
-            <div>
-              <IconButton
-                size="large"
-                aria-label="account of current user"
-                aria-controls="menu-appbar"
-                aria-haspopup="true"
-                onClick={handleMenu}
-                color="inherit"
-              >
-                <AccountCircle />
-              </IconButton>
-              <Menu
-                id="menu-appbar"
-                anchorEl={anchorEl}
-                anchorOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
-                keepMounted
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
-                open={Boolean(anchorEl)}
-                onClose={handleClose}
-              >
-                <MenuItem onClick={handleClose}>Profile</MenuItem>
-                <MenuItem onClick={handleClose}>My account</MenuItem>
-              </Menu>
-            </div>
-          )}
+
+          <div>
+            <IconButton
+              size="large"
+              aria-label="account of current user"
+              aria-controls="menu-appbar"
+              aria-haspopup="true"
+              onClick={handleMenu}
+              color="inherit"
+            >
+              <AccountCircle />
+            </IconButton>
+            <Menu
+              id="menu-appbar"
+              anchorEl={anchorEl}
+              anchorOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+              open={Boolean(anchorEl)}
+              onClose={handleClose}
+            >
+              <MenuItem onClick={handleClose}>Logout</MenuItem>
+            </Menu>
+          </div>
         </Toolbar>
       </AppBar>
       <Drawer variant="permanent">
