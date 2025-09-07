@@ -7,6 +7,20 @@ const initialState = {
   error: null,
 };
 
+export const getTaskById = createAsyncThunk(
+  'tasks/getTaskById',
+  async (taskId, { getState, rejectWithValue }) => {
+    try {
+      const { auth } = getState();
+      const response = await axios.get(`/api/tasks/${taskId}`,
+        { headers: { Authorization: `Bearer ${auth.accessToken}` } });
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
 export const fetchTasks = createAsyncThunk(
   'tasks/fetchTasks',
   async (_, { getState, rejectWithValue }) => {
@@ -81,7 +95,26 @@ const tasksSlice = createSlice({
       .addCase(createTask.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload;
-      });
+      })
+      .addCase(getTaskById.fulfilled, (state, action) => {
+              // Replace or add the fetched task in the tasks array
+              const idx = state.tasks.findIndex(t => t.id === action.payload.id);
+              if (idx !== -1) {
+                state.tasks[idx] = action.payload;
+              } else {
+                state.tasks.push(action.payload);
+              }
+              state.status = 'succeeded';
+              state.error = null;
+            })
+            .addCase(getTaskById.pending, (state) => {
+              state.status = 'loading';
+              state.error = null;
+            })
+            .addCase(getTaskById.rejected, (state, action) => {
+              state.status = 'failed';
+              state.error = action.payload;
+            });;
   },
 });
 

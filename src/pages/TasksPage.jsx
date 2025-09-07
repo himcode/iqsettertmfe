@@ -196,7 +196,7 @@ const TasksPage = () => {
               {tasks.map((row) => (
                 <TableRow key={row.id}>
                   <TableCell>
-                    <a onClick={() => navigate(`task/${row.id}`)}>
+                    <a onClick={() => navigate(`/task/${row.id}`)}>
                       {row.title}{' '}
                     </a>
                   </TableCell>
